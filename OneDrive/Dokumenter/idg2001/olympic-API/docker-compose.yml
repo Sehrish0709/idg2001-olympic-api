@@ -18,3 +18,15 @@ services:
     container_name: cache
     ports:
       - "8002:8002"
+
+  rate-limiter:
+    build: ./rate-limiter
+    container_name: rate-limiter
+    ports:
+      - "8003:8003"
+
+  logger:
+    build: ./logger
+    container_name: logger
+    ports:
+      - "8004:8004"
