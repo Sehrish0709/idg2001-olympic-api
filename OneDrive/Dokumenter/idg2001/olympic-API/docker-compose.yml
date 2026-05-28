@@ -1,0 +1,20 @@
+services:
+  api:
+    build: .
+    container_name: olympic-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+  token-shop:
+    build: ./token-shop
+    container_name: token-shop
+    ports:
+      - "8001:8001"
+
+  cache:
+    build: ./cache
+    container_name: cache
+    ports:
+      - "8002:8002"
