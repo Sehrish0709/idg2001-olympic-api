@@ -24,13 +24,11 @@ def get_sport(
 ):
     """
     Retrieve Olympic medal statistics for a sport.
-
-    Consumes one token from the user account and returns
-    medal statistics based on the provided filters.
     """
 
     db = SessionLocal()
 
+    # ---------------- RATE LIMITER ----------------
     try:
         import httpx
 
@@ -53,6 +51,7 @@ def get_sport(
     except Exception:
         pass
 
+    # ---------------- USER ----------------
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -67,6 +66,7 @@ def get_sport(
     tokens_left = user.tokens
     db.commit()
 
+    # ---------------- LOGGER ----------------
     try:
         import httpx
 
@@ -83,6 +83,25 @@ def get_sport(
 
     db.close()
 
+    # ---------------- CACHE KEY ----------------
+    cache_key = f"{sport_name}-{user_id}-{country}-{year}-{medal}-{format}"
+
+    # ---------------- CACHE CHECK ----------------
+    try:
+        import httpx
+
+        cached = httpx.get(f"http://cache:8002/cache/{cache_key}")
+
+        if cached.status_code == 200:
+            data = cached.json()
+
+            if "sport" in data or "results" in data:
+                return data
+
+    except Exception:
+        pass
+
+    # ---------------- DATA PROCESSING ----------------
     results = []
 
     with open("app/data/olympics.csv", newline="", encoding="utf-8") as f:
@@ -125,6 +144,19 @@ def get_sport(
         "tokens_left": tokens_left
     }
 
+    # ---------------- SAVE TO CACHE ----------------
+    try:
+        import httpx
+
+        httpx.post(
+            f"http://cache:8002/cache/{cache_key}",
+            json=result
+        )
+
+    except Exception:
+        pass
+
+    # ---------------- XML SUPPORT ----------------
     if format.lower() == "xml":
         root = ET.Element("sport")
 

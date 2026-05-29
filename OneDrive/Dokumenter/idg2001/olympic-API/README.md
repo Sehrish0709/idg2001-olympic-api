@@ -121,3 +121,68 @@ This demonstrates how query parameters can be used to filter results.
 - The database is used to store users and their tokens
 - The API structure is designed to demonstrate how a token-based system works
 - The Olympic data is based on a real dataset but simplified to improve performance
+
+# Assignment 2
+
+In Assignment 2, the Olympic API from Assignment 1 was extended with new functionality and several microservices.
+
+## API Improvements
+
+The API was updated to version 2 and now includes:
+
+* User management
+* Token management
+* Sport filtering by country, year and medal
+* Token validation for protected endpoints
+
+Users must have available tokens to access Olympic data. One token is consumed for each request.
+
+## Token Shop Service
+
+A separate token shop service was created to allow users to purchase additional tokens. This service communicates with the main API and updates the user's token balance.
+
+## Cache Service
+
+A cache service was added to improve performance. When a request has already been processed, the result can be returned from the cache instead of being generated again.
+
+The cache service also keeps track of cache hits and cache misses.
+
+## Rate Limiter Service
+
+A rate limiter service was implemented to prevent users from sending too many requests in a short period of time.
+
+This helps protect the API and ensures fair usage.
+
+## Logger Service
+
+A logger service was created to record API activity.
+
+Information is stored in CSV log files and includes details about requests, cache usage and other system events.
+
+Retention endpoints were also implemented to make log management easier.
+
+## Docker and Microservices
+
+Docker was used to containerize all services.
+
+Docker Compose was used to run the complete system with multiple containers.
+
+The project consists of:
+
+* Main API
+* Token Shop Service
+* Cache Service
+* Rate Limiter Service
+* Logger Service
+
+Volumes were also used to store datasets and log files.
+
+## Testing and Code Quality
+
+Pytest was used to test important functionality in the system.
+
+Flake8 was used to check code style and maintain consistency.
+
+Mypy was used for static type checking.
+
+All implemented tests pass successfully.
