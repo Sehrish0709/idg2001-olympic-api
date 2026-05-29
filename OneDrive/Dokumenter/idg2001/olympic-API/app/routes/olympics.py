@@ -31,6 +31,28 @@ def get_sport(
 
     db = SessionLocal()
 
+    try:
+        import httpx
+
+        response = httpx.get(
+            f"http://rate-limiter:8003/{user_id}"
+        )
+
+        rate_data = response.json()
+
+        if rate_data["delay"] > 0:
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit exceeded"
+            )
+
+        httpx.post(
+            f"http://rate-limiter:8003/{user_id}"
+        )
+
+    except Exception:
+        pass
+
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
