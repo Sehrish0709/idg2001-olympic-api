@@ -1,3 +1,8 @@
+"""
+Olympic sport endpoints.
+Provides Olympic statistics and token consumption.
+"""
+
 from fastapi import APIRouter, HTTPException
 from ..database import SessionLocal
 from ..models import User
@@ -14,9 +19,15 @@ def get_sport(
     year: int = None,
     medal: str = None
 ):
+    """
+    Retrieve Olympic medal statistics for a sport.
+
+    Consumes one token from the user account and returns
+    medal statistics based on the provided filters.
+    """
+
     db = SessionLocal()
 
-    # 🔹 hent bruker
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
@@ -27,33 +38,27 @@ def get_sport(
         db.close()
         raise HTTPException(status_code=400, detail="No tokens left")
 
-    # 🔹 bruk ett token
     user.tokens -= 1
     tokens_left = user.tokens
     db.commit()
 
     db.close()
 
-    # 🔹 les CSV data
     results = []
 
     with open("app/data/olympics.csv", newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
 
         for row in reader:
-            # filtrer på sport
             if row["Sport"].lower() != sport_name.lower():
                 continue
 
-            # filtrer på country
             if country and row["NOC"] != country:
                 continue
 
-            # filtrer på year
             if year and int(row["Year"]) != year:
                 continue
 
-            # filtrer på medal
             if medal:
                 if not row["Medal"]:
                     continue
@@ -62,7 +67,6 @@ def get_sport(
 
             results.append(row)
 
-    # 🔹 tell medaljer
     gold = sum(1 for r in results if r["Medal"] == "Gold")
     silver = sum(1 for r in results if r["Medal"] == "Silver")
     bronze = sum(1 for r in results if r["Medal"] == "Bronze")

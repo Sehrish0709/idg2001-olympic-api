@@ -30,3 +30,5 @@ services:
     container_name: logger
     ports:
       - "8004:8004"
+    volumes:
+      - ./logger/logs:/app/logs
