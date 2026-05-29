@@ -45,6 +45,20 @@ def get_sport(
     tokens_left = user.tokens
     db.commit()
 
+    try:
+        import httpx
+
+        httpx.post(
+            "http://logger:8004/log",
+            json={
+                "username": user.email,
+                "endpoint": f"/sport/{sport_name}",
+                "tokens": tokens_left
+            }
+        )
+    except Exception:
+        pass
+
     db.close()
 
     results = []
