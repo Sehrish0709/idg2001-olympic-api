@@ -4,9 +4,11 @@ Provides Olympic statistics and token consumption.
 """
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import Response
 from ..database import SessionLocal
 from ..models import User
 import csv
+import xml.etree.ElementTree as ET
 
 router = APIRouter()
 
@@ -17,7 +19,8 @@ def get_sport(
     user_id: int,
     country: str = None,
     year: int = None,
-    medal: str = None
+    medal: str = None,
+    format: str = "json"
 ):
     """
     Retrieve Olympic medal statistics for a sport.
@@ -71,7 +74,7 @@ def get_sport(
     silver = sum(1 for r in results if r["Medal"] == "Silver")
     bronze = sum(1 for r in results if r["Medal"] == "Bronze")
 
-    return {
+    result = {
         "sport": sport_name,
         "results": {
             "gold": gold,
@@ -85,3 +88,21 @@ def get_sport(
         },
         "tokens_left": tokens_left
     }
+
+    if format.lower() == "xml":
+        root = ET.Element("sport")
+
+        ET.SubElement(root, "name").text = sport_name
+        ET.SubElement(root, "gold").text = str(gold)
+        ET.SubElement(root, "silver").text = str(silver)
+        ET.SubElement(root, "bronze").text = str(bronze)
+        ET.SubElement(root, "tokens_left").text = str(tokens_left)
+
+        xml_string = ET.tostring(root)
+
+        return Response(
+            content=xml_string,
+            media_type="application/xml"
+        )
+
+    return result
